@@ -1,6 +1,9 @@
   
-gclone   
+gclone  
 ====  
+ [English](https://github.com/donwa/gclone/blob/master/README.md) 简体中文  
+   
+   
 一个[rclone](//github.com/rclone/rclone)  的修改版.  
 为Google Drive操作增加自动切换账户和命令行根目录id操作支持.  
 其他功能与原版rclone相同.  
