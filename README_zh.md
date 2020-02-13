@@ -26,7 +26,7 @@ gclone version
 type = drive  
 scope = drive  
 service_account_file = /root/accounts/1.json  
-service_account_file_path = /root/accounts/  
+service_account_file_path = /root/accounts/  <------- (核心)添加了这个配置  
 root_folder_id = root  
 ```
 其中`/root/accounts/`文件夹中存放了多个访问和编辑权限相同的service account file(*.json).  
