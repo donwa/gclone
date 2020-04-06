@@ -20,7 +20,7 @@ gclone version
 
 ## Instructions 
 ### 1.service_account_file_path Configuration   
-add `service_account_file_path` Configuration.For dynamic replacement service_account_file(sa文件). Replace configuration when `rateLimitExceeded` error occurs
+add `service_account_file_path` Configuration.For dynamic replacement service_account_file(sa file). Replace configuration when `rateLimitExceeded` error occurs
 `rclone.conf` example:  
 ```
 [gc]
