@@ -30,7 +30,7 @@ service_account_file_path = /root/accounts/  <------- (核心)添加了这个配
 root_folder_id = root  
 ```
 其中`/root/accounts/`文件夹中存放了多个访问和编辑权限相同的service account file(*.json).  
-配置完成后.只要是`rclone`对`gc:`进行操作,出现`rateLimitExceeded`错误时,都会自动更换sa文件,实现无缝绕过限制.  
+配置完成后.只要是`gclone`对`gc:`进行操作,出现`rateLimitExceeded`错误时,都会自动更换sa文件,实现无缝绕过限制.  
   
   
   
