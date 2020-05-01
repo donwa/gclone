@@ -1109,7 +1109,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 			RootId := path[1:idIndex];
 			name += RootId
 			//opt.ServerSideAcrossConfigs = true
-			if(len(RootId) == 33){
+			if(len(RootId) == 33 || len(RootId) == 28){
 				maybeIsFile = true
 				opt.RootFolderID = RootId;
 			}else{
