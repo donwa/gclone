@@ -621,21 +621,19 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 			return true, err
 		}
 		if len(gerr.Errors) > 0 {
-			reason := gerr.Errors[0].Reason
-			if reason == "rateLimitExceeded" || reason == "userRateLimitExceeded" {
-				// 如果存在 ServiceAccountFilePath,调用 changeSvc, 重试
-				if(f.opt.ServiceAccountFilePath != ""){
-					f.waitChangeSvc.Lock()
-					f.changeSvc()
-					f.waitChangeSvc.Unlock()
-					return true, err
-				}
-				if f.opt.StopOnUploadLimit && gerr.Errors[0].Message == "User rate limit exceeded." {
-					fs.Errorf(f, "Received upload limit error: %v", err)
-					return false, fserrors.FatalError(err)
-				}
+			// reason := gerr.Errors[0].Reason
+			// 如果存在 ServiceAccountFilePath,调用 changeSvc, 重试
+			if(f.opt.ServiceAccountFilePath != ""){
+				f.waitChangeSvc.Lock()
+				f.changeSvc()
+				f.waitChangeSvc.Unlock()
 				return true, err
 			}
+			if f.opt.StopOnUploadLimit && gerr.Errors[0].Message == "User rate limit exceeded." {
+				fs.Errorf(f, "Received upload limit error: %v", err)
+				return false, fserrors.FatalError(err)
+			}
+			return true, err
 		}
 	}
 	return false, err
