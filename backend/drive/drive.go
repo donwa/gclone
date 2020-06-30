@@ -654,6 +654,9 @@ func (f *Fs) changeSvc(){
 			fmt.Println("read ServiceAccountFilePath Files error")
 		}
 		for i, v := range dir_list {
+			if (!strings.HasSuffix(opt.ServiceAccountFilePath, "/")) {
+				opt.ServiceAccountFilePath += "/"
+			}
 			filePath := fmt.Sprintf("%s%s", opt.ServiceAccountFilePath, v.Name())
 			if(".json" == path.Ext(filePath)){
 				//fmt.Println(filePath)
