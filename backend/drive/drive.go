@@ -675,11 +675,9 @@ func (f *Fs) changeSvc(){
 	for k := range f.ServiceAccountFiles {	
 		if r < startSA {	
 			r++
-		}
-		else if r > endSA {	
+		} else if r > endSA {	
 			break
-		}
-		else if k != nil {	
+		} else if k != nil {	
 			opt.ServiceAccountFile = k
 			break
 		} else {
