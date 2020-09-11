@@ -689,7 +689,7 @@ func (f *Fs) changeSvc(){
 	/**
 	 * Create client and svc
 	 */
-	loadedCreds, _ := ioutil.ReadFile(os.ExpandEnv(opt.ServiceAccountFile))
+	loadedCreds, _ := ioutil.ReadFile(opt.ServiceAccountFile)
 	opt.ServiceAccountCredentials = string(loadedCreds)
 	oAuthClient, err := getServiceAccountClient(opt, []byte(opt.ServiceAccountCredentials))
 	if err != nil {
@@ -1103,27 +1103,7 @@ func newFs(name, path string, m configmap.Mapper) (*Fs, error) {
 	// Parse config into Options struct
 	opt := new(Options)
 	err := configstruct.Set(m, opt)
-	//-----------------------------------------------------------
-	maybeIsFile := false
-	// Add {id} as the root directory function
-	if(path != "" && path[0:1] == "{"){
-		idIndex := strings.Index(path,"}")
-		if(idIndex > 0){
-			RootId := path[1:idIndex];
-			name += RootId
-			//opt.ServerSideAcrossConfigs = true
-			if(len(RootId) == 33){
-				maybeIsFile = true
-				opt.RootFolderID = RootId;
-			}else{
-				opt.RootFolderID = RootId;
-				opt.TeamDriveID = RootId;
-			}
-			path = path[idIndex+1:]
-		}
-	}
 
-	//-----------------------------------------------------------
 	if err != nil {
 		return nil, err
 	}
@@ -1232,28 +1212,6 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	if err != nil {
 		return nil, err
 	}
-	//------------------------------------------------------
-	if(maybeIsFile){
-		file,err := f.svc.Files.Get(opt.RootFolderID).Fields("name","id","size","mimeType").SupportsAllDrives(true).Do()
-		if err == nil{
-			//fmt.Println("file.MimeType", file.MimeType)
-			if( "application/vnd.google-apps.folder" != file.MimeType && file.MimeType != ""){
-				tempF := *f
-				newRoot := ""
-				tempF.dirCache = dircache.New(newRoot, f.rootFolderID, &tempF)
-				tempF.root = newRoot
-				f.dirCache = tempF.dirCache
-				f.root = tempF.root
-
-				extension, exportName, exportMimeType, isDocument := f.findExportFormat(file)
-				obj, _ := f.newObjectWithExportInfo(file.Name, file, extension, exportName, exportMimeType, isDocument)
-				f.root = "isFile:"+file.Name
-				f.FileObj = &obj
-				return f, fs.ErrorIsFile
-			}
-		}
-	}
-	//------------------------------------------------------
 
 	// Find the current root
 	err = f.dirCache.FindRoot(ctx, false)
