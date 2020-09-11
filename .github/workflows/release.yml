@@ -5,6 +5,7 @@ on:
     tags:
       - '*'
 
+
 jobs:
   goreleaser:
     runs-on: ubuntu-latest
