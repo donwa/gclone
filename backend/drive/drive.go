@@ -658,14 +658,14 @@ func (f *Fs) changeSvc(){
 	if(len(f.ServiceAccountFiles) <= 0){
 		return ;
 	}
-	startSA := opt.service_account_start
+	startSA := opt.ServiceAccountFileStart
 	// If it is still 0 after reading the folder, exit
-	if(opt.service_account_start == -1){
+	if(opt.ServiceAccountFileStart == -1){
 	        startSA := 0 ;
 	}
-	endSA := opt.service_account_end
+	endSA := opt.ServiceAccountFileEnd
 	// If it is still 0 after reading the folder, exit
-	if(opt.service_account_end == -1){
+	if(opt.ServiceAccountFileEnd == -1){
 		endSA := len(f.ServiceAccountFiles) ;
 	}
 	/**
