@@ -677,15 +677,14 @@ func (f *Fs) changeSvc(){
 			r++
 		} else if r > endSA {	
 			break
-		} else if k != nil {	
+		} else if f.ServiceAccountFiles[k] != nil {	
 			opt.ServiceAccountFile = k
 			break
 		} else {
 			fmt.Println("No more SA available !", r)
 		}
 	}
-	opt.ServiceAccountFile=f.ServiceAccountFiles[startSA]
-	
+
 	// Remove from inventory
 	delete(f.ServiceAccountFiles, opt.ServiceAccountFile)
 
