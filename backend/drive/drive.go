@@ -671,15 +671,18 @@ func (f *Fs) changeSvc(){
 	/**
 	 *  Take the first SA, then if already used, the next one
 	 */
-	r := startSA
+	r := 0
 	for k := range f.ServiceAccountFiles {	
-		if f.ServiceAccountFiles[r] != nil {	
-			opt.ServiceAccountFile = k
+		if r < startSA {	
+			r++
 		}
-		if r > endSA {	
+		else if r > endSA {	
 			break
 		}
-		r++
+		else if k != nil {	
+			opt.ServiceAccountFile = k
+			break
+		} else fmt.Println("No more SA available !", r)
 	}
 	opt.ServiceAccountFile=f.ServiceAccountFiles[startSA]
 	
