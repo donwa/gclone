@@ -682,7 +682,9 @@ func (f *Fs) changeSvc(){
 		else if k != nil {	
 			opt.ServiceAccountFile = k
 			break
-		} else fmt.Println("No more SA available !", r)
+		} else {
+			fmt.Println("No more SA available !", r)
+		}
 	}
 	opt.ServiceAccountFile=f.ServiceAccountFiles[startSA]
 	
