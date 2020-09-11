@@ -233,6 +233,16 @@ in with the ID of the root folder.
 			Help:     "Service Account Credentials JSON blob\nLeave blank normally.\nNeeded only if you want use SA instead of interactive login.",
 			Hide:     fs.OptionHideConfigurator,
 			Advanced: true,
+		},{
+			Name:     "service_account_start",
+			Default:  -1,
+			Help:     "Start of SA to use",
+			Advanced: true,
+		},{
+			Name:     "service_account_end",
+			Default:  -1,
+			Help:     "End of SA to use",
+			Advanced: true,
 		}, {
 			Name:     "team_drive",
 			Help:     "ID of the Team Drive",
@@ -328,7 +338,6 @@ Photos folder" option in your google drive settings. You can then copy
 or move the photos locally and use the date the image was taken
 (created) set as the modification date.`,
 			Advanced: true,
-			Hide:     fs.OptionHideConfigurator,
 		}, {
 			Name:    "use_shared_date",
 			Default: false,
@@ -340,7 +349,6 @@ unexpected consequences when uploading/downloading files.
 If both this flag and "--drive-use-created-date" are set, the created
 date is used.`,
 			Advanced: true,
-			Hide:     fs.OptionHideConfigurator,
 		}, {
 			Name:     "list_chunk",
 			Default:  1000,
@@ -414,7 +422,6 @@ doing rclone ls/lsl/lsf/lsjson/etc only.
 If you do use this flag for syncing (not recommended) then you will
 need to use --ignore size also.`,
 			Advanced: true,
-			Hide:     fs.OptionHideConfigurator,
 		}, {
 			Name:     "v2_download_min_size",
 			Default:  fs.SizeSuffix(-1),
@@ -500,9 +507,10 @@ type Options struct {
 	Scope                     string               `config:"scope"`
 	RootFolderID              string               `config:"root_folder_id"`
 	ServiceAccountFile        string               `config:"service_account_file"`
-	// 添加一个变量
 	ServiceAccountFilePath    string               `config:"service_account_file_path"`
 	ServiceAccountCredentials string               `config:"service_account_credentials"`
+	ServiceAccountFileStart   int                  `config:"service_account_start"`
+	ServiceAccountFileEnd     int                  `config:"service_account_end"`
 	TeamDriveID               string               `config:"team_drive"`
 	AuthOwnerOnly             bool                 `config:"auth_owner_only"`
 	UseTrash                  bool                 `config:"use_trash"`
@@ -623,7 +631,7 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 		if len(gerr.Errors) > 0 {
 			reason := gerr.Errors[0].Reason
 			if reason == "rateLimitExceeded" || reason == "userRateLimitExceeded" {
-				// 如果存在 ServiceAccountFilePath,调用 changeSvc, 重试
+				// If ServiceAccountFilePath exists, call changeSvc and try again
 				if(f.opt.ServiceAccountFilePath != ""){
 					f.waitChangeSvc.Lock()
 					f.changeSvc()
@@ -641,11 +649,11 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 	return false, err
 }
 
-// 替换 f.svc 函数
+// Replace f.svc function
 func (f *Fs) changeSvc(){
 	opt := &f.opt;
 	/**
-	 *  获取sa文件列表
+	 *  Get the list of sa files
 	 */
 	if(opt.ServiceAccountFilePath != "" && len(f.ServiceAccountFiles) == 0){
 		f.ServiceAccountFiles = make(map[string]int)
@@ -661,25 +669,41 @@ func (f *Fs) changeSvc(){
 			}
 		}
 	}
-	// 如果读取文件夹后还是0 , 退出
+
+	// If it is still 0 after reading the folder, exit
 	if(len(f.ServiceAccountFiles) <= 0){
 		return ;
 	}
+	startSA := opt.service_account_start
+	// If it is still 0 after reading the folder, exit
+	if(opt.service_account_start == -1){
+	        startSA := 0 ;
+	}
+	endSA := opt.service_account_end
+	// If it is still 0 after reading the folder, exit
+	if(opt.service_account_end == -1){
+		endSA := len(f.ServiceAccountFiles) ;
+	}
 	/**
-	 *  从sa文件列表 随机取一个，并删除列表中的元素
+	 *  Take the first SA, then if already used, the next one
 	 */
-	r := rand.Intn(len(f.ServiceAccountFiles))
-	for k := range f.ServiceAccountFiles {
-		if r == 0 {
+	r := startSA
+	for k := range f.ServiceAccountFiles {	
+		if f.ServiceAccountFiles[r] != nil {	
 			opt.ServiceAccountFile = k
 		}
-		r--
+		if r > endSA {	
+			break
+		}
+		r++
 	}
-	// 从库存中删除
+	opt.ServiceAccountFile=f.ServiceAccountFiles[startSA]
+	
+	// Remove from inventory
 	delete(f.ServiceAccountFiles, opt.ServiceAccountFile)
 
 	/**
-	 * 创建 client 和 svc
+	 * Create client and svc
 	 */
 	loadedCreds, _ := ioutil.ReadFile(os.ExpandEnv(opt.ServiceAccountFile))
 	opt.ServiceAccountCredentials = string(loadedCreds)
@@ -690,6 +714,7 @@ func (f *Fs) changeSvc(){
 	f.client = oAuthClient
 	f.svc, err = drive.New(f.client)
 	fmt.Println("gclone sa file:", opt.ServiceAccountFile)
+	fmt.Println("gclone sa number:", r)
 }
 
 // parseParse parses a drive 'url'
@@ -828,8 +853,8 @@ func (f *Fs) list(ctx context.Context, dirIDs []string, title string, directorie
 		fields += ",quotaBytesUsed"
 	}
 
-	fields = fmt.Sprintf("files(%s),nextPageToken,incompleteSearch", fields)
-
+	fields = fmt.Sprintf("files(%s),nextPageToken", fields)
+	
 OUTER:
 	for {
 		var files *drive.FileList
@@ -839,9 +864,6 @@ OUTER:
 		})
 		if err != nil {
 			return false, errors.Wrap(err, "couldn't list directory")
-		}
-		if files.IncompleteSearch {
-			fs.Errorf(f, "search result INCOMPLETE")
 		}
 		for _, item := range files.Files {
 			item.Name = f.opt.Enc.ToStandardName(item.Name)
@@ -1102,7 +1124,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	err := configstruct.Set(m, opt)
 	//-----------------------------------------------------------
 	maybeIsFile := false
-	// 添加  {id} 作为根目录功能
+	// Add {id} as the root directory function
 	if(path != "" && path[0:1] == "{"){
 		idIndex := strings.Index(path,"}")
 		if(idIndex > 0){
