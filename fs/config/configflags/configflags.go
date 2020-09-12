@@ -123,6 +123,8 @@ func AddFlags(flagSet *pflag.FlagSet) {
 	flags.StringArrayVarP(flagSet, &downloadHeaders, "header-download", "", nil, "Set HTTP header for download transactions")
 	flags.StringArrayVarP(flagSet, &headers, "header", "", nil, "Set HTTP header for all transactions")
 	flags.BoolVarP(flagSet, &fs.Config.RefreshTimes, "refresh-times", "", fs.Config.RefreshTimes, "Refresh the modtime of remote files.")
+	flags.IntVarP(flagSet, &fs.Config.ServiceAccountFileStart, "service_account_start", "", fs.Config.ServiceAccountFileStart, "First SA to consider.")
+	flags.IntVarP(flagSet, &fs.Config.ServiceAccountFileEnd, "service_account_end", "", fs.Config.ServiceAccountFileEnd, "Last SA to consider.")
 }
 
 // ParseHeaders converts the strings passed in via the header flags into HTTPOptions
