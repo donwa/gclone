@@ -687,7 +687,7 @@ func (f *Fs) changeSvc(){
 		return false, errors.Errorf("No more SA available !", endSA)
 	}
 	// get the range we want
-	var sa []string = keys[startSA:endSA]
+	var sa []string = keys[startSA:startSA]
 	for _, k := range sa {	
 		opt.ServiceAccountFile = k
 		fs.Debugf(f, "Use SA :%d", k)
