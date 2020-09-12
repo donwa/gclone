@@ -660,15 +660,15 @@ func (f *Fs) changeSvc(){
 	}
 	startSA := opt.ServiceAccountFileStart
 	// If it is still 0 after reading the folder, exit
-	if(opt.ServiceAccountFileStart == -1){
-	        startSA := 0 ;
+	if(startSA == -1){
+	        startSA = 0 ;
 	}
 	endSA := opt.ServiceAccountFileEnd
 	// If it is still 0 after reading the folder, exit
-	if(opt.ServiceAccountFileEnd == -1){
-		endSA := len(f.ServiceAccountFiles) ;
-	} else if(opt.ServiceAccountFileEnd > len(f.ServiceAccountFiles)){
-		endSA := len(f.ServiceAccountFiles) ;
+	if(endSA == -1){
+		endSA = len(f.ServiceAccountFiles) ;
+	} else if(endSA > len(f.ServiceAccountFiles)){
+		endSA = len(f.ServiceAccountFiles) ;
 	}
 	
 	// sort the SA
