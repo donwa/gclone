@@ -615,7 +615,11 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 				// If ServiceAccountFilePath exists, call changeSvc and try again
 				if(f.opt.ServiceAccountFilePath != ""){
 					f.waitChangeSvc.Lock()
-					f.changeSvc()
+					_, err := f.changeSvc()
+					if e != nil {
+						fs.Errorf(f, "Stop no more SA", err)
+						return false, fserrors.FatalError(err)
+					}
 					f.waitChangeSvc.Unlock()
 					return true, err
 				}
@@ -679,8 +683,8 @@ func (f *Fs) changeSvc(){
 	}
 	sort.Strings(keys)
 	if(startSA>endSA){
-		fs.Debugf(f, "No more SA available !, last :%d", endSA)
-		return ;
+		fs.Errorf(f, "No more SA available !", err)
+		return false, errors.Errorf("No more SA available !", endSA)
 	}
 	// get the range we want
 	var sa []string = keys[startSA:endSA]
