@@ -671,14 +671,13 @@ func (f *Fs) changeSvc(){
 	/**
 	 *  Take the first SA, then if already used, the next one
 	 */
-	r := 0
-	for k := range f.ServiceAccountFiles {	
-		if r < startSA {	
+	for i, v := range f.ServiceAccountFiles {	
+		if i < startSA {	
 			r++
-		} else if r > endSA {	
+		} else if i > endSA {	
 			break
-		} else if f.ServiceAccountFiles[k] != nil {	
-			opt.ServiceAccountFile = k
+		} else if f.ServiceAccountFiles[v] == startSA {	
+			opt.ServiceAccountFile = v
 			break
 		} else {
 			fmt.Println("No more SA available !", r)
@@ -687,7 +686,9 @@ func (f *Fs) changeSvc(){
 
 	// Remove from inventory
 	delete(f.ServiceAccountFiles, opt.ServiceAccountFile)
-
+	// Remove 
+	opt.ServiceAccountFileEnd--
+	
 	/**
 	 * Create client and svc
 	 */
