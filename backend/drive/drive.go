@@ -658,7 +658,7 @@ func (f *Fs) changeSvc()(bool, error) {
 		}
 	}
 
-	startSA := opt.ServiceAccountFileStart
+	startSA := opt.ServiceAccountFileStart-1
 	// If it is still 0 after reading the folder, exit
 	if(startSA == -1){
 	        startSA = 0 ;
@@ -678,17 +678,14 @@ func (f *Fs) changeSvc()(bool, error) {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
+	fs.Debugf(f, "All SA array: %v", k)
 	if(startSA>endSA){
 		fs.Errorf(f, "No more SA available !", endSA)
 		return false, errors.Errorf("No more SA available !", endSA)
 	}
 	// get the range we want
-	var sa []string = keys[startSA:startSA]
-	for _, k := range sa {	
-		opt.ServiceAccountFile = k
-		fs.Debugf(f, "Use SA :%d", k)
-		break
-	}
+	opt.ServiceAccountFile = keys[startSA]
+	fs.Debugf(f, "Use SA :%d", opt.ServiceAccountFile)
 
 	opt.ServiceAccountFileStart++
 	
@@ -700,6 +697,7 @@ func (f *Fs) changeSvc()(bool, error) {
 	oAuthClient, err := getServiceAccountClient(opt, []byte(opt.ServiceAccountCredentials))
 	if err != nil {
 		errors.Wrap(err, "failed to create oauth client from service account")
+		return true, errors.Errorf("failed to create oauth client from service account", err)
 	}
 	f.client = oAuthClient
 	f.svc, err = drive.New(f.client)
