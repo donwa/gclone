@@ -670,7 +670,8 @@ func (f *Fs) changeSvc(){
 	} else if(endSA > len(f.ServiceAccountFiles)){
 		endSA = len(f.ServiceAccountFiles) ;
 	}
-	
+	fs.Debugf(f, "startSA :%d", startSA)
+	fs.Debugf(f, "endSA :%d", endSA)
 	// sort the SA
 	var keys []string
 	for k := range f.ServiceAccountFiles {
@@ -678,13 +679,14 @@ func (f *Fs) changeSvc(){
 	}
 	sort.Strings(keys)
 	if(startSA>endSA){
-		fmt.Println("No more SA available !, last :%d", endSA)
+		fs.Debugf(f, "No more SA available !, last :%d", endSA)
 		return ;
 	}
 	// get the range we want
 	var sa []string = keys[startSA:endSA]
 	for _, k := range sa {	
 		opt.ServiceAccountFile = k
+		fs.Debugf(f, "Use SA :%d", k)
 		break
 	}
 
@@ -701,8 +703,8 @@ func (f *Fs) changeSvc(){
 	}
 	f.client = oAuthClient
 	f.svc, err = drive.New(f.client)
-	fmt.Println("gclone sa file:", opt.ServiceAccountFile)
-	fmt.Println("gclone sa number:", startSA)
+	fs.Debugf(f, "gclone sa file: %s", opt.ServiceAccountFile)
+	fs.Debugf(f, "gclone sa number: %d", startSA)
 }
 
 // parseParse parses a drive 'url'
