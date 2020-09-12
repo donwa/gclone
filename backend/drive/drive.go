@@ -616,7 +616,7 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 				if(f.opt.ServiceAccountFilePath != ""){
 					f.waitChangeSvc.Lock()
 					_, err := f.changeSvc()
-					if e != nil {
+					if err != nil {
 						fs.Errorf(f, "Stop no more SA", err)
 						return false, fserrors.FatalError(err)
 					}
@@ -638,7 +638,7 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 }
 
 // Replace f.svc function
-func (f *Fs) changeSvc(){
+func (f *Fs) changeSvc()(bool, error) {
 	opt := &f.opt;
 	/**
 	 *  Get the list of sa files
@@ -658,10 +658,6 @@ func (f *Fs) changeSvc(){
 		}
 	}
 
-	// If it is still 0 after reading the folder, exit
-	if(len(f.ServiceAccountFiles) <= 0){
-		return ;
-	}
 	startSA := opt.ServiceAccountFileStart
 	// If it is still 0 after reading the folder, exit
 	if(startSA == -1){
@@ -683,7 +679,7 @@ func (f *Fs) changeSvc(){
 	}
 	sort.Strings(keys)
 	if(startSA>endSA){
-		fs.Errorf(f, "No more SA available !", err)
+		fs.Errorf(f, "No more SA available !", endSA)
 		return false, errors.Errorf("No more SA available !", endSA)
 	}
 	// get the range we want
@@ -709,6 +705,7 @@ func (f *Fs) changeSvc(){
 	f.svc, err = drive.New(f.client)
 	fs.Debugf(f, "gclone sa file: %s", opt.ServiceAccountFile)
 	fs.Debugf(f, "gclone sa number: %d", startSA)
+	return true, err
 }
 
 // parseParse parses a drive 'url'
