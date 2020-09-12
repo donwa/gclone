@@ -667,27 +667,28 @@ func (f *Fs) changeSvc(){
 	// If it is still 0 after reading the folder, exit
 	if(opt.ServiceAccountFileEnd == -1){
 		endSA := len(f.ServiceAccountFiles) ;
+	} else if(opt.ServiceAccountFileEnd > len(f.ServiceAccountFiles)){
+		endSA := len(f.ServiceAccountFiles) ;
 	}
-	/**
-	 *  Take the first SA, then if already used, the next one
-	 */
-	for i, v := range f.ServiceAccountFiles {	
-		if i < startSA {	
-			r++
-		} else if i > endSA {	
-			break
-		} else if f.ServiceAccountFiles[v] == startSA {	
-			opt.ServiceAccountFile = v
-			break
-		} else {
-			fmt.Println("No more SA available !", r)
-		}
+	
+	// sort the SA
+	var keys []string
+	for k := range f.ServiceAccountFiles {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	if(startSA>endSA){
+		fmt.Println("No more SA available !, last :%d", endSA)
+		return ;
+	}
+	// get the range we want
+	var sa []string = keys[startSA:endSA]
+	for _, k := range sa {	
+		opt.ServiceAccountFile = f.ServiceAccountFiles[k]
+		break
 	}
 
-	// Remove from inventory
-	delete(f.ServiceAccountFiles, opt.ServiceAccountFile)
-	// Remove 
-	opt.ServiceAccountFileEnd--
+	opt.ServiceAccountFileStart++
 	
 	/**
 	 * Create client and svc
@@ -701,7 +702,7 @@ func (f *Fs) changeSvc(){
 	f.client = oAuthClient
 	f.svc, err = drive.New(f.client)
 	fmt.Println("gclone sa file:", opt.ServiceAccountFile)
-	fmt.Println("gclone sa number:", r)
+	fmt.Println("gclone sa number:", startSA)
 }
 
 // parseParse parses a drive 'url'
