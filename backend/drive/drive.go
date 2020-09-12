@@ -684,7 +684,7 @@ func (f *Fs) changeSvc(){
 	// get the range we want
 	var sa []string = keys[startSA:endSA]
 	for _, k := range sa {	
-		opt.ServiceAccountFile = f.ServiceAccountFiles[k]
+		opt.ServiceAccountFile = k
 		break
 	}
 
