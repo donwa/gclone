@@ -678,7 +678,7 @@ func (f *Fs) changeSvc()(bool, error) {
 		keys = append(keys, k)
 	}
 	sort.Strings(keys)
-	fs.Debugf(f, "All SA array: %v", k)
+	fs.Debugf(f, "All SA array: %v", keys)
 	if(startSA>endSA){
 		fs.Errorf(f, "No more SA available !", endSA)
 		return false, errors.Errorf("No more SA available !", endSA)
