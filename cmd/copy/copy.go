@@ -2,6 +2,7 @@ package copy
 
 import (
 	"context"
+
 	"github.com/rclone/rclone/cmd"
 	"github.com/rclone/rclone/fs/config/flags"
 	"github.com/rclone/rclone/fs/operations"
@@ -21,7 +22,7 @@ func init() {
 
 var commandDefinition = &cobra.Command{
 	Use:   "copy source:path dest:path",
-	Short: `Copy files from source to dest, skipping already copied`,
+	Short: `Copy files from source to dest, skipping already copied.`,
 	Long: `
 Copy the source to the destination.  Doesn't transfer
 unchanged files, testing by size and modification time or
@@ -65,12 +66,14 @@ option when copying a small number of files into a large destination
 can speed transfers up greatly.
 
 For example, if you have many files in /path/to/src but only a few of
-them change every day, you can to copy all the files which have
-changed recently very efficiently like this:
+them change every day, you can copy all the files which have changed
+recently very efficiently like this:
 
     rclone copy --max-age 24h --no-traverse /path/to/src remote:
 
-**Note**: Use the ` + "`-P`" + `/` + "`--progress`" + ` flag to view real-time transfer statistics
+**Note**: Use the ` + "`-P`" + `/` + "`--progress`" + ` flag to view real-time transfer statistics.
+
+**Note**: Use the ` + "`--dry-run` or the `--interactive`/`-i`" + ` flag to test without copying anything.
 `,
 	Run: func(command *cobra.Command, args []string) {
 		cmd.CheckArgs(2, 2, command, args)
