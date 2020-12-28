@@ -708,7 +708,7 @@ func (f *Fs) changeSvc(){
 	/**
 	 * 创建 client 和 svc
 	 */
-	loadedCreds, _ := ioutil.ReadFile(os.ExpandEnv(opt.ServiceAccountFile))
+	loadedCreds, _ := ioutil.ReadFile(env.ShellExpand(opt.ServiceAccountFile))
 	opt.ServiceAccountCredentials = string(loadedCreds)
 	oAuthClient, err := getServiceAccountClient(opt, []byte(opt.ServiceAccountCredentials))
 	if err != nil {
@@ -1121,27 +1121,6 @@ func newFs(name, path string, m configmap.Mapper) (*Fs, error) {
 	// Parse config into Options struct
 	opt := new(Options)
 	err := configstruct.Set(m, opt)
-	//-----------------------------------------------------------
-	maybeIsFile := false
-	// 添加  {id} 作为根目录功能
-	if(path != "" && path[0:1] == "{"){
-		idIndex := strings.Index(path,"}")
-		if(idIndex > 0){
-			RootId := path[1:idIndex];
-			name += RootId
-			//opt.ServerSideAcrossConfigs = true
-			if(len(RootId) == 33){
-				maybeIsFile = true
-				opt.RootFolderID = RootId;
-			}else{
-				opt.RootFolderID = RootId;
-				opt.TeamDriveID = RootId;
-			}
-			path = path[idIndex+1:]
-		}
-	}
-
-	//-----------------------------------------------------------
 	if err != nil {
 		return nil, err
 	}
@@ -1208,6 +1187,27 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	if err != nil {
 		return nil, err
 	}
+	//-----------------------------------------------------------
+	maybeIsFile := false
+	// 添加  {id} 作为根目录功能
+	if(path != "" && path[0:1] == "{"){
+		idIndex := strings.Index(path,"}")
+		if(idIndex > 0){
+			RootId := path[1:idIndex];
+			name += RootId
+			//opt.ServerSideAcrossConfigs = true
+			if(len(RootId) == 33){
+				maybeIsFile = true
+				f.opt.RootFolderID = RootId;
+			}else{
+				f.opt.RootFolderID = RootId;
+				f.opt.TeamDriveID = RootId;
+			}
+			path = path[idIndex+1:]
+		}
+	}
+
+	//-----------------------------------------------------------
 
 	// Set the root folder ID
 	if f.opt.RootFolderID != "" {
@@ -1253,7 +1253,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 
 	//------------------------------------------------------
 	if(maybeIsFile){
-		file,err := f.svc.Files.Get(opt.RootFolderID).Fields("name","id","size","mimeType").SupportsAllDrives(true).Do()
+		file,err := f.svc.Files.Get(f.opt.RootFolderID).Fields("name","id","size","mimeType").SupportsAllDrives(true).Do()
 		if err == nil{
 			//fmt.Println("file.MimeType", file.MimeType)
 			if( "application/vnd.google-apps.folder" != file.MimeType && file.MimeType != ""){
