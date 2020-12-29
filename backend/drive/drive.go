@@ -1261,7 +1261,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	if(maybeIsFile){
 		file,err := f.svc.Files.Get(f.opt.RootFolderID).Fields("name","id","size","mimeType").SupportsAllDrives(true).Do()
 		if err == nil{
-			fmt.Println("file.MimeType", file.MimeType)
+			// fmt.Println("file.MimeType", file.MimeType)
 			if( "application/vnd.google-apps.folder" != file.MimeType && file.MimeType != ""){
 				tempF := *f
 				newRoot := ""
@@ -1276,6 +1276,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 				f.FileObj = &obj
 				return f, fs.ErrorIsFile
 			}
+			fmt.Println("file.MimeType", file.MimeType)
 		}
 	}
 	//------------------------------------------------------
