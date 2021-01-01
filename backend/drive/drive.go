@@ -651,11 +651,7 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 				// If ServiceAccountFilePath exists, call changeSvc and try again
 				if(f.opt.ServiceAccountFilePath != ""){
 					f.waitChangeSvc.Lock()
-					_, err := f.changeSvc()
-					if err != nil {
-						fs.Errorf(f, "Stop no more SA", err)
-						return false, fserrors.FatalError(err)
-					}
+					f.changeSvc()
 					f.waitChangeSvc.Unlock()
 					return true, err
 				}
