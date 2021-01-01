@@ -1,8 +1,9 @@
 @echo off
-title gclone-mod-1.53.3 is the best, batch file edited by Tomyummmm, original by RoshanConnor Yo yo (https://telegra.ph/gclone-mod-1.53.3-Guide-for-Windows-07-20)
+title gclone-mod-1.53.3 is the best, batch file edited by Tomyummmm, original by RoshanConnor Yo yo
 
 color 0b
 echo Hey Sexy! Wanna clone some TBs?
+echo This version uses gclone-mod-1.53.3, updated and maintained by me (Tomyummmm) here: https://github.com/tomyummmm/gclone
 echo ----------------------------------------------------------------------------------------------------------------------
 echo Configured Team Drives
 gclone-mod-1.53.3 listremotes
@@ -110,15 +111,21 @@ goto menu
 
 :list
 echo.
+echo ----------------------------------------------------------------------------------------------------------------------
+echo Configured Team Drives
+gclone-mod-1.53.3 listremotes
+echo ----------------------------------------------------------------------------------------------------------------------
+echo.
 echo 1) ls           List the objects in the path with size and path.
 echo 2) lsd          List all directories/containers/buckets in the path.
 echo 3) lsf          List directories and objects in remote:path formatted for parsing
 echo 4) lsjson       List directories and objects in the path in JSON format.
 echo 5) lsl          List the objects in path with modification time, size and path.
 echo 6) tree         List the contents of the remote in a tree like fashion.
-echo 7) listremotes  List all the remotes in the config file.
+echo Q) Return to menu
 echo.
 set /P listtype="Type of List? "
+if /I %listtype% == Q (goto menu)
 set /P remote="[Enter Folder / TeamDrive] "
 echo.
 if %listtype% == 1 (gclone-mod-1.53.3 ls %remote%)
@@ -127,7 +134,6 @@ if %listtype% == 3 (gclone-mod-1.53.3 lsf %remote%)
 if %listtype% == 4 (gclone-mod-1.53.3 lsjson %remote%)
 if %listtype% == 5 (gclone-mod-1.53.3 lsl %remote%)
 if %listtype% == 6 (gclone-mod-1.53.3 tree %remote%)
-if %listtype% == 7 (gclone-mod-1.53.3 listremotes)
 echo.
 pause
 goto menu
@@ -215,11 +221,27 @@ goto menu
 
 :empt
 echo.
-echo The bin will be cleared after about 15 minutes. Just wait patiently.
 set /P src="[Enter TeamDrive ID] "
 echo ----------------------------------------------------------------------------------------------------------------------
+set /P choice="Do you want to do a dry run? (y/n) "
+if /I %choice%==y (goto emptdr)
+if /I %choice%==n (goto emptnodr)
+
+
+:emptdr
+echo ----------------------------------------------------------------------------------------------------------------------
+gclone-mod-1.53.3 delete %src% -vP --drive-trashed-only --drive-use-trash=false --fast-list --dry-run
+echo ----------------------------------------------------------------------------------------------------------------------
+echo off
+echo.
 set /P choice="Proceed to empty trash? (y/n) "
-if /I %choice%==y (gclone-mod-1.53.3 cleanup %src%)
+if /I %choice%==y (goto emptnodr)
+if /I %choice%==n (goto menu)
+
+
+:emptnodr
+set /P choice="Are you sure? (y/n) "
+if /I %choice%==y (gclone-mod-1.53.3 delete %src% -vP --drive-trashed-only --drive-use-trash=false --fast-list)
 if /I %choice%==n (goto menu)
 echo.
 pause
