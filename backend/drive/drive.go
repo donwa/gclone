@@ -235,8 +235,10 @@ a non root folder as its starting point.
 			Name: "service_account_file",
 			Help: "Service Account Credentials JSON file path \nLeave blank normally.\nNeeded only if you want use SA instead of interactive login." + env.ShellExpandHelp,
 		}, {
+			//------------------------------------------------------------
 			Name: "service_account_file_path",
 			Help: "Service Account Credentials JSON file path .\n",
+			//------------------------------------------------------------
 		}, {
 			Name:     "service_account_credentials",
 			Help:     "Service Account Credentials JSON blob\nLeave blank normally.\nNeeded only if you want use SA instead of interactive login.",
@@ -515,9 +517,10 @@ type Options struct {
 	Scope                     string               `config:"scope"`
 	RootFolderID              string               `config:"root_folder_id"`
 	ServiceAccountFile        string               `config:"service_account_file"`
+	//------------------------------------------------------------
 	// 添加一个变量 Add a Variable
 	ServiceAccountFilePath    string               `config:"service_account_file_path"`
-	// ------------------------------------------------------------
+	//------------------------------------------------------------
 	ServiceAccountCredentials string               `config:"service_account_credentials"`
 	TeamDriveID               string               `config:"team_drive"`
 	AuthOwnerOnly             bool                 `config:"auth_owner_only"`
@@ -576,7 +579,7 @@ type Fs struct {
 	waitChangeSvc sync.Mutex
 	FileObj *fs.Object
 	FileName string
-	// ------------------------------------------------------------
+	//------------------------------------------------------------
 }
 
 type baseObject struct {
@@ -647,6 +650,7 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 		if len(gerr.Errors) > 0 {
 			reason := gerr.Errors[0].Reason
 			if reason == "rateLimitExceeded" || reason == "userRateLimitExceeded" {
+				//------------------------------------------------------------
 				// 如果存在 ServiceAccountFilePath,调用 changeSvc, 重试
 				// If ServiceAccountFilePath exists, call changeSvc and try again
 				if(f.opt.ServiceAccountFilePath != ""){
@@ -655,7 +659,7 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 					f.waitChangeSvc.Unlock()
 					return true, err
 				}
-				//----------------------------------------------------
+				//------------------------------------------------------------
 				if f.opt.StopOnUploadLimit && gerr.Errors[0].Message == "User rate limit exceeded." {
 					fs.Errorf(f, "Received upload limit error: %v", err)
 					return false, fserrors.FatalError(err)
@@ -670,7 +674,7 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 	return false, err
 }
 
-// ------------------------------------------------------------
+//------------------------------------------------------------
 // 替换 f.svc 函数
 // Replace f.svc function
 func (f *Fs) changeSvc(){
@@ -724,7 +728,7 @@ func (f *Fs) changeSvc(){
 	f.svc, err = drive.New(f.client)
 	fmt.Println("gclone sa file:", opt.ServiceAccountFile)
 }
-// ------------------------------------------------------------
+//------------------------------------------------------------
 
 // parseParse parses a drive 'url'
 func parseDrivePath(path string) (root string, err error) {
@@ -1191,7 +1195,7 @@ func newFs(name, path string, m configmap.Mapper) (*Fs, error) {
 // NewFs constructs an Fs from the path, container:path
 func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	ctx := context.Background()
-	//-----------------------------------------------------------
+	//------------------------------------------------------------
 	maybeIsFile := false
 	idIndex := 0
 	RootId := ""
@@ -1209,14 +1213,14 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 			fs.Debugf("path after removal", path)
 		}
 	}
-	//-----------------------------------------------------------
+	//------------------------------------------------------------
 
 	f, err := newFs(name, path, m)
 	if err != nil {
 		return nil, err
 	}
 
-	//-----------------------------------------------------------
+	//------------------------------------------------------------
 	if (idIndex > 0){
 		if(len(RootId) == 33){
 			maybeIsFile = true
@@ -1226,7 +1230,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 			f.opt.TeamDriveID = RootId;
 		}
 	}
-	//-----------------------------------------------------------
+	//------------------------------------------------------------
 
 	// Set the root folder ID
 	if f.opt.RootFolderID != "" {
@@ -1270,7 +1274,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 		return nil, err
 	}
 
-	//------------------------------------------------------
+	//------------------------------------------------------------
 	if(maybeIsFile){
 		file,err := f.svc.Files.Get(f.opt.RootFolderID).Fields("name","id","size","mimeType").SupportsAllDrives(true).Do()
 		if err == nil{
@@ -1291,7 +1295,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 			}
 		}
 	}
-	//------------------------------------------------------
+	//------------------------------------------------------------
 
 	// Find the current root
 	err = f.dirCache.FindRoot(ctx, false)
@@ -1490,11 +1494,11 @@ func (f *Fs) newObjectWithExportInfo(
 // NewObject finds the Object at remote.  If it can't be found
 // it returns the error fs.ErrorObjectNotFound.
 func (f *Fs) NewObject(ctx context.Context, remote string) (fs.Object, error) {
-	//------------------------------------
+	//------------------------------------------------------------
 	if(f.FileObj != nil){
 		return *f.FileObj, nil
 	}
-	//-------------------------------------
+	//------------------------------------------------------------
 	info, extension, exportName, exportMimeType, isDocument, err := f.getRemoteInfoWithExport(ctx, remote)
 	if err != nil {
 		return nil, err

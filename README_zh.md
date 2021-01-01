@@ -1,16 +1,13 @@
   
 gclone  
 ====  
- [English](https://github.com/donwa/gclone/blob/master/README.md) 简体中文  
+简体中文 [English](https://github.com/tomyummmm/gclone/blob/master/README.md)   
    
    
 一个[rclone](//github.com/rclone/rclone)  的修改版.  
 为Google Drive操作增加自动切换账户和命令行根目录id操作支持.  
 其他功能与原版rclone相同.  
-## 安装  
-```
-bash <(wget -qO- https://git.io/gclone.sh)
-```
+
 
 ```
 // 查看版本信息
@@ -20,6 +17,7 @@ gclone version
 ## 操作说明  
 ### 1.service_account_file_path配置   
 添加`service_account_file_path`配置.用于动态替换service_account_file(sa文件).实现`rateLimitExceeded`错误时,替换当前用户，绕过750G限制.  
+
 `rclone.conf`文件示例:  
 ```
 [gc]
@@ -29,7 +27,7 @@ service_account_file = /root/accounts/1.json
 service_account_file_path = /root/accounts/  <------- (核心)添加了这个配置  
 root_folder_id = root  
 ```
-其中`/root/accounts/`文件夹中存放了多个访问和编辑权限相同的service account file(*.json).  
+其中`/root/accounts/`文件夹中存放了多个访问和编辑权限相同的***service account file (x.json)***.  
 配置完成后.只要是`gclone`对`gc:`进行操作,出现`rateLimitExceeded`错误时,都会自动更换sa文件,实现无缝绕过限制.  
   
   
