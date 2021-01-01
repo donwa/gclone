@@ -1141,7 +1141,7 @@ func newFs(name, path string, m configmap.Mapper) (*Fs, error) {
 		return nil, errors.Wrap(err, "drive: failed when making oauth client")
 	}
 
-	fmt.Println("path: ", path)
+	fs.Debugf("path in newFs: ", path)
 	root, err := parseDrivePath(path)
 	if err != nil {
 		return nil, err
@@ -1194,28 +1194,19 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	// 添加  {id} 作为根目录功能
 	if(path != "" && path[0:1] == "{"){
 		idIndex = strings.Index(path,"}")
-		fmt.Println("path: ", path)
-		fmt.Println("idIndex: ", idIndex)
+		fs.Debugf("path: ", path)
+		fs.Debugf("idIndex: ", idIndex)
 		if(idIndex > 0){
 			RootId = path[1:idIndex];
 			name += RootId
-			fmt.Println("RootId: ", RootId)
-			fmt.Println("name: ", name)
-			//opt.ServerSideAcrossConfigs = true
-			// if(len(RootId) == 33){
-			// 	maybeIsFile = true
-			// 	f.opt.RootFolderID = RootId;
-			// }else{
-			// 	f.opt.RootFolderID = RootId;
-			// 	f.opt.TeamDriveID = RootId;
-			// }
+			fs.Debugf("RootId: ", RootId)
+			fs.Debugf("name: ", name)
 			path = path[idIndex+1:]
-			fmt.Println("path: ", path)
-			// fmt.Println("f.opt.RootFolderID: ", f.opt.RootFolderID)
+			fs.Debugf("path after removal: ", path)
 		}
 	}
-
 	//-----------------------------------------------------------
+
 	f, err := newFs(name, path, m)
 	if err != nil {
 		return nil, err
@@ -1279,7 +1270,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	if(maybeIsFile){
 		file,err := f.svc.Files.Get(f.opt.RootFolderID).Fields("name","id","size","mimeType").SupportsAllDrives(true).Do()
 		if err == nil{
-			// fmt.Println("file.MimeType", file.MimeType)
+			fs.Debugf("file.MimeType: ", file.MimeType)
 			if( "application/vnd.google-apps.folder" != file.MimeType && file.MimeType != ""){
 				tempF := *f
 				newRoot := ""
@@ -1294,7 +1285,6 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 				f.FileObj = &obj
 				return f, fs.ErrorIsFile
 			}
-			fmt.Println("file.MimeType", file.MimeType)
 		}
 	}
 	//------------------------------------------------------
