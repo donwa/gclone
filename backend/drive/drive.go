@@ -1194,15 +1194,15 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	// 添加  {id} 作为根目录功能
 	if(path != "" && path[0:1] == "{"){
 		idIndex = strings.Index(path,"}")
-		fs.Debugf("path: ", path)
+		fs.Debugf("path", path)
 		fs.Debugf(nil, "idIndex: %d", idIndex)
 		if(idIndex > 0){
 			RootId = path[1:idIndex];
 			name += RootId
-			fs.Debugf("RootId: ", RootId)
-			fs.Debugf("name: ", name)
+			fs.Debugf("RootId", RootId)
+			fs.Debugf("name", name)
 			path = path[idIndex+1:]
-			fs.Debugf("path after removal: ", path)
+			fs.Debugf("path after removal", path)
 		}
 	}
 	//-----------------------------------------------------------
@@ -1270,7 +1270,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	if(maybeIsFile){
 		file,err := f.svc.Files.Get(f.opt.RootFolderID).Fields("name","id","size","mimeType").SupportsAllDrives(true).Do()
 		if err == nil{
-			fs.Debugf("file.MimeType: ", file.MimeType)
+			fs.Debugf("file.MimeType", file.MimeType)
 			if( "application/vnd.google-apps.folder" != file.MimeType && file.MimeType != ""){
 				tempF := *f
 				newRoot := ""
