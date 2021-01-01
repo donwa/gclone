@@ -1140,7 +1140,7 @@ func newFs(name, path string, m configmap.Mapper) (*Fs, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "drive: failed when making oauth client")
 	}
-	
+
 	fmt.Println("path: ", path)
 	root, err := parseDrivePath(path)
 	if err != nil {
@@ -1200,16 +1200,16 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 			fmt.Println("RootId: ", RootId)
 			fmt.Println("name: ", name)
 			//opt.ServerSideAcrossConfigs = true
-			if(len(RootId) == 33){
-				maybeIsFile = true
-				f.opt.RootFolderID = RootId;
-			}else{
-				f.opt.RootFolderID = RootId;
-				f.opt.TeamDriveID = RootId;
-			}
+			// if(len(RootId) == 33){
+			// 	maybeIsFile = true
+			// 	f.opt.RootFolderID = RootId;
+			// }else{
+			// 	f.opt.RootFolderID = RootId;
+			// 	f.opt.TeamDriveID = RootId;
+			// }
 			path = path[idIndex+1:]
 			fmt.Println("path: ", path)
-			fmt.Println("f.opt.RootFolderID: ", f.opt.RootFolderID)
+			// fmt.Println("f.opt.RootFolderID: ", f.opt.RootFolderID)
 		}
 	}
 
@@ -1217,6 +1217,16 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	f, err := newFs(name, path, m)
 	if err != nil {
 		return nil, err
+	}
+
+	if (idIndex > 0){
+		if(len(RootId) == 33){
+			maybeIsFile = true
+			f.opt.RootFolderID = RootId;
+		}else{
+			f.opt.RootFolderID = RootId;
+			f.opt.TeamDriveID = RootId;
+		}
 	}
 
 	// Set the root folder ID
