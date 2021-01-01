@@ -1195,7 +1195,7 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	if(path != "" && path[0:1] == "{"){
 		idIndex = strings.Index(path,"}")
 		fs.Debugf("path: ", path)
-		fs.Debugf("idIndex: %d", idIndex)
+		fs.Debugf("idIndex: %v", idIndex)
 		if(idIndex > 0){
 			RootId = path[1:idIndex];
 			name += RootId
