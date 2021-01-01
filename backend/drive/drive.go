@@ -517,6 +517,7 @@ type Options struct {
 	ServiceAccountFile        string               `config:"service_account_file"`
 	// 添加一个变量 Add a Variable
 	ServiceAccountFilePath    string               `config:"service_account_file_path"`
+	// ------------------------------------------------------------
 	ServiceAccountCredentials string               `config:"service_account_credentials"`
 	TeamDriveID               string               `config:"team_drive"`
 	AuthOwnerOnly             bool                 `config:"auth_owner_only"`
@@ -575,6 +576,7 @@ type Fs struct {
 	waitChangeSvc sync.Mutex
 	FileObj *fs.Object
 	FileName string
+	// ------------------------------------------------------------
 }
 
 type baseObject struct {
@@ -646,10 +648,14 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 			reason := gerr.Errors[0].Reason
 			if reason == "rateLimitExceeded" || reason == "userRateLimitExceeded" {
 				// 如果存在 ServiceAccountFilePath,调用 changeSvc, 重试
-				// If ServiceAccountFilePath exists, initialise changeSvc, try again
+				// If ServiceAccountFilePath exists, call changeSvc and try again
 				if(f.opt.ServiceAccountFilePath != ""){
 					f.waitChangeSvc.Lock()
-					f.changeSvc()
+					_, err := f.changeSvc()
+					if err != nil {
+						fs.Errorf(f, "Stop no more SA", err)
+						return false, fserrors.FatalError(err)
+					}
 					f.waitChangeSvc.Unlock()
 					return true, err
 				}
@@ -668,12 +674,13 @@ func (f *Fs) shouldRetry(err error) (bool, error) {
 	return false, err
 }
 
+// ------------------------------------------------------------
 // 替换 f.svc 函数
+// Replace f.svc function
 func (f *Fs) changeSvc(){
 	opt := &f.opt;
-	/**
-	 *  获取sa文件列表
-	 */
+	// 获取sa文件列表
+	// Obtain list of SA
 	if(opt.ServiceAccountFilePath != "" && len(f.ServiceAccountFiles) == 0){
 		f.ServiceAccountFiles = make(map[string]int)
 		dir_list, e := ioutil.ReadDir(opt.ServiceAccountFilePath)
@@ -692,12 +699,12 @@ func (f *Fs) changeSvc(){
 		}
 	}
 	// 如果读取文件夹后还是0 , 退出
+	// If it is still 0 after reading the folder, exit
 	if(len(f.ServiceAccountFiles) <= 0){
 		return ;
 	}
-	/**
-	 *  从sa文件列表 随机取一个，并删除列表中的元素
-	 */
+	// 从sa文件列表 随机取一个，并删除列表中的元素
+	// Randomly select a SA from the list, remove it from the list.
 	r := rand.Intn(len(f.ServiceAccountFiles))
 	for k := range f.ServiceAccountFiles {
 		if r == 0 {
@@ -706,11 +713,11 @@ func (f *Fs) changeSvc(){
 		r--
 	}
 	// 从库存中删除
+	// Remove the SA from the array
 	delete(f.ServiceAccountFiles, opt.ServiceAccountFile)
 
-	/**
-	 * 创建 client 和 svc
-	 */
+	//创建 client 和 svc
+	// Create client and svc
 	loadedCreds, _ := ioutil.ReadFile(env.ShellExpand(opt.ServiceAccountFile))
 	opt.ServiceAccountCredentials = string(loadedCreds)
 	oAuthClient, err := getServiceAccountClient(opt, []byte(opt.ServiceAccountCredentials))
@@ -721,6 +728,7 @@ func (f *Fs) changeSvc(){
 	f.svc, err = drive.New(f.client)
 	fmt.Println("gclone sa file:", opt.ServiceAccountFile)
 }
+// ------------------------------------------------------------
 
 // parseParse parses a drive 'url'
 func parseDrivePath(path string) (root string, err error) {
