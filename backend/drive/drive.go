@@ -1140,7 +1140,8 @@ func newFs(name, path string, m configmap.Mapper) (*Fs, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "drive: failed when making oauth client")
 	}
-
+	
+	fmt.Println("path: ", path)
 	root, err := parseDrivePath(path)
 	if err != nil {
 		return nil, err
@@ -1186,37 +1187,37 @@ func newFs(name, path string, m configmap.Mapper) (*Fs, error) {
 // NewFs constructs an Fs from the path, container:path
 func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 	ctx := context.Background()
+	//-----------------------------------------------------------
+	maybeIsFile := false
+	// 添加  {id} 作为根目录功能
+	if(path != "" && path[0:1] == "{"){
+		idIndex := strings.Index(path,"}")
+		fmt.Println("path: ", path)
+		fmt.Println("idIndex: ", idIndex)
+		if(idIndex > 0){
+			RootId := path[1:idIndex];
+			name += RootId
+			fmt.Println("RootId: ", RootId)
+			fmt.Println("name: ", name)
+			//opt.ServerSideAcrossConfigs = true
+			if(len(RootId) == 33){
+				maybeIsFile = true
+				f.opt.RootFolderID = RootId;
+			}else{
+				f.opt.RootFolderID = RootId;
+				f.opt.TeamDriveID = RootId;
+			}
+			path = path[idIndex+1:]
+			fmt.Println("path: ", path)
+			fmt.Println("f.opt.RootFolderID: ", f.opt.RootFolderID)
+		}
+	}
+
+	//-----------------------------------------------------------
 	f, err := newFs(name, path, m)
 	if err != nil {
 		return nil, err
 	}
-	// //-----------------------------------------------------------
-	// maybeIsFile := false
-	// // 添加  {id} 作为根目录功能
-	// if(path != "" && path[0:1] == "{"){
-	// 	idIndex := strings.Index(path,"}")
-	// 	fmt.Println("path: ", path)
-	// 	fmt.Println("idIndex: ", idIndex)
-	// 	if(idIndex > 0){
-	// 		RootId := path[1:idIndex];
-	// 		name += RootId
-	// 		fmt.Println("RootId: ", RootId)
-	// 		fmt.Println("name: ", name)
-	// 		//opt.ServerSideAcrossConfigs = true
-	// 		if(len(RootId) == 33){
-	// 			maybeIsFile = true
-	// 			f.opt.RootFolderID = RootId;
-	// 		}else{
-	// 			f.opt.RootFolderID = RootId;
-	// 			f.opt.TeamDriveID = RootId;
-	// 		}
-	// 		path = path[idIndex+1:]
-	// 		fmt.Println("path: ", path)
-	// 		fmt.Println("f.opt.RootFolderID: ", f.opt.RootFolderID)
-	// 	}
-	// }
-
-	// //-----------------------------------------------------------
 
 	// Set the root folder ID
 	if f.opt.RootFolderID != "" {
@@ -1260,29 +1261,29 @@ func NewFs(name, path string, m configmap.Mapper) (fs.Fs, error) {
 		return nil, err
 	}
 
-	// //------------------------------------------------------
-	// if(maybeIsFile){
-	// 	file,err := f.svc.Files.Get(f.opt.RootFolderID).Fields("name","id","size","mimeType").SupportsAllDrives(true).Do()
-	// 	if err == nil{
-	// 		// fmt.Println("file.MimeType", file.MimeType)
-	// 		if( "application/vnd.google-apps.folder" != file.MimeType && file.MimeType != ""){
-	// 			tempF := *f
-	// 			newRoot := ""
-	// 			tempF.dirCache = dircache.New(newRoot, f.rootFolderID, &tempF)
-	// 			tempF.root = newRoot
-	// 			f.dirCache = tempF.dirCache
-	// 			f.root = tempF.root
+	//------------------------------------------------------
+	if(maybeIsFile){
+		file,err := f.svc.Files.Get(f.opt.RootFolderID).Fields("name","id","size","mimeType").SupportsAllDrives(true).Do()
+		if err == nil{
+			// fmt.Println("file.MimeType", file.MimeType)
+			if( "application/vnd.google-apps.folder" != file.MimeType && file.MimeType != ""){
+				tempF := *f
+				newRoot := ""
+				tempF.dirCache = dircache.New(newRoot, f.rootFolderID, &tempF)
+				tempF.root = newRoot
+				f.dirCache = tempF.dirCache
+				f.root = tempF.root
 
-	// 			extension, exportName, exportMimeType, isDocument := f.findExportFormat(file)
-	// 			obj, _ := f.newObjectWithExportInfo(file.Name, file, extension, exportName, exportMimeType, isDocument)
-	// 			f.root = "isFile:"+file.Name
-	// 			f.FileObj = &obj
-	// 			return f, fs.ErrorIsFile
-	// 		}
-	// 		fmt.Println("file.MimeType", file.MimeType)
-	// 	}
-	// }
-	// //------------------------------------------------------
+				extension, exportName, exportMimeType, isDocument := f.findExportFormat(file)
+				obj, _ := f.newObjectWithExportInfo(file.Name, file, extension, exportName, exportMimeType, isDocument)
+				f.root = "isFile:"+file.Name
+				f.FileObj = &obj
+				return f, fs.ErrorIsFile
+			}
+			fmt.Println("file.MimeType", file.MimeType)
+		}
+	}
+	//------------------------------------------------------
 
 	// Find the current root
 	err = f.dirCache.FindRoot(ctx, false)
