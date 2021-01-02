@@ -685,6 +685,8 @@ func (f *Fs) changeSvc(){
 		f.ServiceAccountFiles = make(map[string]int)
 		dir_list, e := ioutil.ReadDir(env.ShellExpand(opt.ServiceAccountFilePath))
 		if e != nil {
+			fmt.Println("ServiceAccountFilePath: ", opt.ServiceAccountFilePath)
+			fmt.Println("ShellExpand ServiceAccountFilePath: ", env.ShellExpand(opt.ServiceAccountFilePath))
 			fmt.Println("read ServiceAccountFilePath error")
 		}
 		for i, v := range dir_list {
