@@ -280,15 +280,19 @@ echo.
 goto menu
 
 :adv
+setlocal EnableDelayedExpansion
 echo.
 echo ----------------------------------------------------------------------------------------------------------------------
-echo Command line interface for gclone-mod-1.1
+echo Command Line Interface for gclone-mod-1.1
 echo Enter your commands and flags, gclone-mod-1.1 is automatically typed for you. e.g. --help OR ls remote:
+echo This batch script is gc-local, source and destination is remote:path or remote:{folder id}.
 echo Enter Q to return to menu.
 echo.
-set /P choice="Command / flags: "
-if /I %choice% == Q (goto menu)
+gclone-mod-1.1 listremotes
 echo.
-gclone-mod-1.1 %choice%
+set /P command="[Enter command / flags] "
+if /I "!command!"=="Q" (goto menu)
+echo.
+gclone-mod-1.1 !command!
 echo.
 goto adv
