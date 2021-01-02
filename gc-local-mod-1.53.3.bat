@@ -26,6 +26,7 @@ echo 10) EMPTY TRASH
 echo N) NCDU - Explore a remote with a text based user interface.
 echo M) MD5SUM - Produces an md5sum file for all the objects in the path.
 echo C) CONFIG - Enter an interactive configuration session.
+echo A) ADVANCED - For experienced users only, command line.
 echo Q) EXIT
 echo.
 set /P option="Choose your Mode: "
@@ -42,6 +43,7 @@ if %option% == 10 (goto empt)
 if /I %option% == N (goto ncdu)
 if /I %option% == M (goto md5)
 if /I %option% == C (goto config)
+if /I %option% == A (goto adv)
 if /I %option% == Q (EXIT)
 echo Invalid input!
 goto menu
@@ -276,3 +278,17 @@ gclone-mod-1.53.3 config
 echo ----------------------------------------------------------------------------------------------------------------------
 echo.
 goto menu
+
+:adv
+echo.
+echo ----------------------------------------------------------------------------------------------------------------------
+echo Command line interface for gclone-mod-1.53.3
+echo Enter your commands and flags, gclone-mod-1.53.3 is automatically typed for you. e.g. --help OR ls remote:
+echo Enter Q to return to menu.
+echo.
+set /P choice="Command / flags: "
+if /I %choice% == Q (goto menu)
+echo.
+gclone-mod-1.53.3 %choice%
+echo.
+goto adv
