@@ -237,7 +237,7 @@ a non root folder as its starting point.
 		}, {
 			//------------------------------------------------------------
 			Name: "service_account_file_path",
-			Help: "Service Account Credentials JSON file path .\n",
+			Help: "Service Account Credentials JSON file path.\n" + env.ShellExpandHelp,
 			//------------------------------------------------------------
 		}, {
 			Name:     "service_account_credentials",
@@ -683,9 +683,9 @@ func (f *Fs) changeSvc(){
 	// Obtain list of SA
 	if(opt.ServiceAccountFilePath != "" && len(f.ServiceAccountFiles) == 0){
 		f.ServiceAccountFiles = make(map[string]int)
-		dir_list, e := ioutil.ReadDir(opt.ServiceAccountFilePath)
+		dir_list, e := ioutil.ReadDir(env.ShellExpand(opt.ServiceAccountFilePath))
 		if e != nil {
-			fmt.Println("read ServiceAccountFilePath Files error")
+			fmt.Println("read ServiceAccountFilePath error")
 		}
 		for i, v := range dir_list {
 			if (!strings.HasSuffix(opt.ServiceAccountFilePath, "/")) {
